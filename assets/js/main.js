@@ -1,42 +1,121 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const year = document.querySelector("[data-year]");
-  if (year) year.textContent = new Date().getFullYear();
 
-  const toggle = document.querySelector(".menu-toggle");
-  const nav = document.querySelector(".main-nav");
-  if (toggle && nav) {
-    toggle.addEventListener("click", () => {
-      const open = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", String(!open));
-      nav.classList.toggle("is-open", !open);
-      document.body.classList.toggle("menu-open", !open);
+document.addEventListener('DOMContentLoaded',function(){
+ const toggle=document.querySelector('.menu-toggle');
+ const nav=document.querySelector('.nav');
+ if(toggle&&nav){toggle.addEventListener('click',()=>{const open=nav.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.textContent=open?'×':'☰';});}
+ document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>{nav?.classList.remove('open');toggle?.setAttribute('aria-expanded','false');if(toggle)toggle.textContent='☰';}));
+ const year=document.querySelector('[data-year]');if(year)year.textContent=new Date().getFullYear();
+});
+
+/* ===== Homepage banner carousel controls ===== */
+(function () {
+  const hero = document.querySelector("#home-hero");
+  if (!hero) return;
+
+  const slides = Array.from(hero.querySelectorAll(".hero-slide"));
+  const dots = Array.from(hero.querySelectorAll(".hero-dot"));
+  const prev = hero.querySelector(".hero-prev");
+  const next = hero.querySelector(".hero-next");
+
+  if (slides.length !== 4 || dots.length !== 4) return;
+
+  let current = 0;
+  let timer;
+
+  function showSlide(index) {
+    current = (index + slides.length) % slides.length;
+
+    slides.forEach((slide, i) => {
+      slide.classList.toggle("active", i === current);
     });
-    nav.querySelectorAll("a").forEach(link => link.addEventListener("click", () => {
-      nav.classList.remove("is-open");
-      toggle.setAttribute("aria-expanded", "false");
-      document.body.classList.remove("menu-open");
-    }));
-  }
 
-  const form = document.querySelector("#enquiry-form");
-  if (form) {
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const recipient = "cliu8898@gmail.com";
-      if (recipient === "cliu8898@gmail.com") {
-        const status = document.querySelector("#form-status");
-        status.textContent = "Please replace cliu8898@gmail.com in contact.html and assets/js/main.js with your business email before using this form.";
-        return;
-      }
-      const data = new FormData(form);
-      const subject = encodeURIComponent("SERISDAN Website Enquiry — " + data.get("project"));
-      const body = encodeURIComponent(
-        "Name / Company: " + data.get("name") + "\n" +
-        "Email: " + data.get("email") + "\n" +
-        "Project: " + data.get("project") + "\n\n" +
-        "Project details:\n" + (data.get("details") || "Not provided")
-      );
-      window.location.href = "mailto:" + recipient + "?subject=" + subject + "&body=" + body;
+    dots.forEach((dot, i) => {
+      dot.classList.toggle("active", i === current);
+      dot.setAttribute("aria-pressed", String(i === current));
     });
   }
+
+  function startAutoPlay() {
+    clearInterval(timer);
+    timer = setInterval(() => {
+      showSlide(current + 1);
+    }, 3000);
+  }
+
+  prev.addEventListener("click", () => {
+    showSlide(current - 1);
+    startAutoPlay();
+  });
+
+  next.addEventListener("click", () => {
+    showSlide(current + 1);
+    startAutoPlay();
+  });
+
+  dots.forEach((dot) => {
+    dot.addEventListener("click", () => {
+      showSlide(Number(dot.dataset.slide));
+      startAutoPlay();
+    });
+  });
+
+  hero.addEventListener("mouseenter", () => clearInterval(timer));
+  hero.addEventListener("mouseleave", startAutoPlay);
+
+  showSlide(0);
+  startAutoPlay();
+})();
+
+/* ===== Inner page banner carousel controls ===== */
+document.querySelectorAll(".page-banner").forEach(function (hero) {
+  const slides = Array.from(hero.querySelectorAll(".page-banner-slide"));
+  const dots = Array.from(hero.querySelectorAll(".page-banner-dot"));
+  const prev = hero.querySelector(".page-banner-prev");
+  const next = hero.querySelector(".page-banner-next");
+
+  if (slides.length !== 4 || dots.length !== 4 || !prev || !next) return;
+
+  let current = 0;
+  let timer;
+
+  function showSlide(index) {
+    current = (index + slides.length) % slides.length;
+
+    slides.forEach((slide, i) => {
+      slide.classList.toggle("active", i === current);
+    });
+
+    dots.forEach((dot, i) => {
+      dot.classList.toggle("active", i === current);
+      dot.setAttribute("aria-pressed", String(i === current));
+    });
+  }
+
+  function startAutoPlay() {
+    clearInterval(timer);
+    timer = setInterval(() => showSlide(current + 1), 3000);
+  }
+
+  prev.addEventListener("click", () => {
+    showSlide(current - 1);
+    startAutoPlay();
+  });
+
+  next.addEventListener("click", () => {
+    showSlide(current + 1);
+    startAutoPlay();
+  });
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener("click", () => {
+      showSlide(i);
+      startAutoPlay();
+    });
+  });
+
+  hero.addEventListener("mouseenter", () => clearInterval(timer));
+  hero.addEventListener("mouseleave", startAutoPlay);
+
+  showSlide(0);
+  startAutoPlay();
 });
